@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.in28minutes.springboot.model.Course;
+import com.in28minutes.springboot.model.Student;
 import com.in28minutes.springboot.service.StudentService;
 
 @RestController
@@ -21,6 +22,26 @@ public class StudentController {
 	@Autowired
 	private StudentService studentService;
 
+	@GetMapping("/students/{studentId}")
+	public Student retrieveStudent(@PathVariable String studentId) {
+		return studentService.retrieveStudent(studentId);
+	}
+	
+	@PostMapping("/students/{studentId}")
+	public ResponseEntity<Void> registerStudent(@PathVariable String studentId,
+			@RequestBody Student newStudent) {
+		Student student = studentService.addStudent(newStudent);
+
+		if (student == null)
+			return ResponseEntity.noContent().build();
+
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path(
+				"/{id}").buildAndExpand(student.getId()).toUri();
+
+		return ResponseEntity.created(location).build();
+		
+	}
+	
 	@GetMapping("/students/{studentId}/courses")
 	public List<Course> retrieveCoursesForStudent(@PathVariable String studentId) {
 		return studentService.retrieveCourses(studentId);

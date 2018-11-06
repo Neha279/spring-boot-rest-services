@@ -2,7 +2,9 @@ package com.in28minutes.springboot.controller;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.in28minutes.springboot.model.Course;
+import com.in28minutes.springboot.model.Student;
 import com.in28minutes.springboot.service.StudentService;
 
 @RunWith(SpringRunner.class)
@@ -33,12 +36,19 @@ public class StudentControllerTest {
 
 	@MockBean
 	private StudentService studentService;
-
+	
 	Course mockCourse = new Course("Course1", "Spring", "10Steps",
 			Arrays.asList("Learn Maven", "Import Project", "First Example",
 					"Second Example"));
 
 	String exampleCourseJson = "{\"name\":\"Spring\",\"description\":\"10Steps\",\"steps\":[\"Learn Maven\",\"Import Project\",\"First Example\",\"Second Example\"]}";
+
+	String exampleCourseListJson = "[{\"id\":\"Course1\",\"name\":\"Spring\",\"description\":\"10Steps\",\"steps\":[\"Learn Maven\",\"Import Project\",\"First Example\",\"Second Example\"]}]";
+
+	Student testStudent = new Student("testStudent1", "jyoti khanna", "Hiker, Programmer and Architect",new ArrayList<>(Arrays
+			.asList(mockCourse)));
+
+	String exampleStudentJson = "{\"id\":\"testStudent1\",\"name\":\"jyoti khanna\",\"description\":\"Hiker, Programmer and Architect\",\"courses\":[{\"id\":\"Course1\",\"name\":\"Spring\",\"description\":\"10Steps\",\"steps\":[\"Learn Maven\",\"Import Project\",\"First Example\",\"Second Example\"]}]}";
 
 	@Test
 	public void retrieveDetailsForCourse() throws Exception {
@@ -51,9 +61,9 @@ public class StudentControllerTest {
 				"/students/Student1/courses/Course1").accept(
 				MediaType.APPLICATION_JSON);
 
+		
 		MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
-		System.out.println(result.getResponse());
 		String expected = "{id:Course1,name:Spring,description:10Steps}";
 
 		// {"id":"Course1","name":"Spring","description":"10 Steps, 25 Examples and 10K Students","steps":["Learn Maven","Import Project","First Example","Second Example"]}
@@ -86,6 +96,83 @@ public class StudentControllerTest {
 
 		assertEquals("http://localhost/students/Student1/courses/1",
 				response.getHeader(HttpHeaders.LOCATION));
+
+	}
+	
+	@Test
+	public void registerStudent() throws Exception {
+		
+		Mockito.when(
+			studentService.addCourse(Mockito.anyString(),
+					Mockito.any(Course.class))).thenReturn(mockCourse);
+	
+		Mockito.when(
+				studentService.addStudent(
+						Mockito.any(Student.class))).thenReturn(testStudent);
+		
+		Mockito.when(
+				studentService.retrieveCourse(Mockito.anyString(),
+						Mockito.anyString())).thenReturn(mockCourse);
+		
+		RequestBuilder requestBuilder = MockMvcRequestBuilders
+				.post("/students/testStudent1")
+				.accept(MediaType.APPLICATION_JSON).content(exampleStudentJson)
+				.contentType(MediaType.APPLICATION_JSON);
+	
+		MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+		System.out.println(result.getResponse().getStatus());
+		
+		assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
+
+	}
+	
+	@Test
+	public void retriveStudent() throws Exception {
+		
+			Mockito.when(
+			studentService.addCourse(Mockito.anyString(),
+					Mockito.any(Course.class))).thenReturn(mockCourse);
+	
+			Mockito.when(
+					studentService.addStudent(
+							Mockito.any(Student.class))).thenReturn(testStudent);
+			  
+			Mockito.when(
+					studentService.retrieveStudent(Mockito.anyString()))
+					.thenReturn(testStudent);
+			
+			RequestBuilder  requestBuilder = MockMvcRequestBuilders
+				.get("/students/testStudent1")
+					.accept(MediaType.APPLICATION_JSON)
+					.contentType(MediaType.APPLICATION_JSON);
+			
+			MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+			
+			JSONAssert.assertEquals(exampleStudentJson, result.getResponse().getContentAsString(), false);
+
+	
+
+	}
+	
+	@Test 
+	public void retriveCoursesForStudent() throws Exception{
+		
+		List<Course> courseList = new ArrayList<>(Arrays.asList(mockCourse));
+		Mockito.when(
+					studentService.retrieveCourses(Mockito.anyString()))
+			        .thenReturn(courseList);
+			
+		RequestBuilder  requestBuilder = MockMvcRequestBuilders
+			.get("/students/Student1/courses")
+			.accept(MediaType.APPLICATION_JSON)
+			.contentType(MediaType.APPLICATION_JSON);
+	
+		MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+	
+		System.out.println("result.getResponse()=" + result.getResponse().getContentAsString() );
+	
+		JSONAssert.assertEquals(exampleCourseListJson, result.getResponse()
+					.getContentAsString(), false);
 
 	}
 

@@ -1,16 +1,20 @@
 package com.in28minutes.springboot.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-@Component
-public class RNGService {
-    private final SecureRandom random;
 
-    @Autowired
+@Component
+@Service
+public class RNGService {
+   
+	private SecureRandom random = new SecureRandom();
+	
+    public RNGService() {}
+    
     public RNGService(SecureRandom random) {
         this.random = random;
     }

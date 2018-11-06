@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.in28minutes.springboot.model.Course;
 import com.in28minutes.springboot.model.Student;
 
-@Component
+
+@Service
 public class StudentService {
 
 	private static List<Student> students = new ArrayList<>();
@@ -99,4 +100,14 @@ public class StudentService {
 
 		return course;
 	}
+	
+    public Student addStudent(Student student) {	
+    	Student tStudent = retrieveStudent(student.getId());
+    	if(tStudent == null) {
+			students.add(student);
+			return student;
+    	}
+		return tStudent;
+	}
+	
 }
