@@ -6,6 +6,7 @@ import com.in28minutes.springboot.service.StudentService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -53,6 +54,15 @@ public class StudentServiceTest {
 	    Course addCourse = studentService.addCourse(addStudent.getId(), mockcourse);
 	    Course found = studentService.retrieveCourse(addStudent.getId(), mockcourse.getId());
 	    assertTrue(found.equals(addCourse));
+	    
+	    /*not valid student fails*/
+	    Course notFound = studentService.retrieveCourse("dummy", mockcourse.getId());
+	    assertNull(notFound);
+	    
+	    /*not valid course fails*/
+	    notFound = studentService.retrieveCourse(addStudent.getId(), "dummyCourse");
+	    assertNull(notFound);
+	    
 	}
 	
 	
@@ -73,6 +83,10 @@ public class StudentServiceTest {
 		Course addCourse = studentService.addCourse(addStudent.getId(), mockcourse);
 	    Course found = studentService.retrieveCourse(addStudent.getId(), mockcourse.getId());
 	    assertTrue(found.equals(addCourse));
+	    
+	    /*not valid student fails*/
+	    Course notFound = studentService.addCourse("dummy", mockcourse);
+		assertNull(notFound);
 			
 	}
 	
@@ -88,10 +102,14 @@ public class StudentServiceTest {
 	public void retrieveCourses() throws Exception{
 	    
 		Student addStudent = studentService.addStudent(testStudent);
+		Course addCourse = studentService.addCourse(addStudent.getId(), mockcourse);
 		Student found = studentService.retrieveStudent(addStudent.getId());
 		
 		List<Course> courses = studentService.retrieveCourses(found.getId());
-		assertNotNull(courses);
+		assertTrue(courses.contains(addCourse));
+		
+		courses = studentService.retrieveCourses("dummy");
+		assertNull(courses);
 		   
 	}
 }

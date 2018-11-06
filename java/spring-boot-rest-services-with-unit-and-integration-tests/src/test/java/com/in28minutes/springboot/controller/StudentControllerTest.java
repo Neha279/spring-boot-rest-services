@@ -1,6 +1,8 @@
 package com.in28minutes.springboot.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,6 +125,17 @@ public class StudentControllerTest {
 		System.out.println(result.getResponse().getStatus());
 		
 		assertEquals(HttpStatus.CREATED.value(), result.getResponse().getStatus());
+		
+		/*not a valid student*/
+		requestBuilder = MockMvcRequestBuilders
+				.post("/students/dummy")
+				.accept(MediaType.APPLICATION_JSON).content(exampleStudentJson)
+				.contentType(MediaType.APPLICATION_JSON);
+		
+		
+		result = mockMvc.perform(requestBuilder).andReturn();
+		assertTrue(result.getResponse().getContentAsString().isEmpty());
+		
 
 	}
 	
@@ -161,6 +174,9 @@ public class StudentControllerTest {
 		Mockito.when(
 					studentService.retrieveCourses(Mockito.anyString()))
 			        .thenReturn(courseList);
+		Mockito.when(
+				studentService.retrieveCourses("_1"))
+		        .thenReturn(null);
 			
 		RequestBuilder  requestBuilder = MockMvcRequestBuilders
 			.get("/students/Student1/courses")
@@ -173,6 +189,17 @@ public class StudentControllerTest {
 	
 		JSONAssert.assertEquals(exampleCourseListJson, result.getResponse()
 					.getContentAsString(), false);
+		
+		/*not a valid student*/
+		RequestBuilder requestBuilder1 = MockMvcRequestBuilders
+				.get("/students/_1/courses")
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON);
+		
+		MvcResult result1 = mockMvc.perform(requestBuilder1).andReturn();
+		System.out.println("--"+ result1.getResponse().getContentAsString());
+		assertTrue(result1.getResponse().getContentAsString().isEmpty());
+
 
 	}
 
